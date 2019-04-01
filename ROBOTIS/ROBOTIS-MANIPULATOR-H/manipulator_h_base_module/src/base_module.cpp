@@ -247,34 +247,37 @@ bool BaseModule::training_callback(train::environment::Request &req,
   
   if(req.action.size() > 1)
   {
-    robotis_->ik_id_start_ = 0;
-    robotis_->ik_id_end_   = END_LINK;
+    // robotis_->ik_id_start_ = 0;
+    // robotis_->ik_id_end_   = END_LINK;
     
-    Eigen::Vector3d p2p_positoin;
+    // Eigen::Vector3d p2p_positoin;
 
-    int     max_iter    = 30;
-    double  ik_tol      = 1e-3;
+    // int     max_iter    = 30;
+    // double  ik_tol      = 1e-3;
 
-    p2p_positoin << req.action[0], 
-                    req.action[1], 
-                    req.action[2];
+    // p2p_positoin << req.action[0], 
+    //                 req.action[1], 
+    //                 req.action[2];
 
-    Eigen::Quaterniond p2p_quaterniond(req.action[3],
-                                       req.action[4],
-                                       req.action[5],
-                                       req.action[6]);
+    // Eigen::Quaterniond p2p_quaterniond(req.action[3],
+    //                                    req.action[4],
+    //                                    req.action[5],
+    //                                    req.action[6]);
 
-    double p2p_phi = req.action[7]*M_PI/2;
-    p2p_rotation = robotis_framework::convertQuaternionToRotation(p2p_quaterniond);
+  for (int i=1; i<=MAX_JOINT_ID; i++)
+    manipulator_->manipulator_link_data_[i]->joint_angle_ += req.action[i-1] * M_PI/180;
+
+    // double p2p_phi = req.action[7]*M_PI/2;
+    // p2p_rotation = robotis_framework::convertQuaternionToRotation(p2p_quaterniond);
     robotis_->is_ik = true;
     manipulator_->forwardKinematics(7);
     // slide_success = manipulator_->slideInverseKinematics(p2p_positoin, p2p_rotation, 
     //                                                           slide_->slide_pos, slide_->goal_slide_pos);
     // std::cout<<"<<<<<<<<<<<<<<<<<<<slide_->goal_slide_pos<<<<<<<<<<<<<<<<<"<<std::endl<<slide_->goal_slide_pos<<std::endl;
-    limit_success = manipulator_->limit_check(p2p_positoin, p2p_rotation);
-    if(limit_success)
-      ik_success = manipulator_->inverseKinematics(robotis_->ik_id_end_,
-                                                              p2p_positoin, p2p_rotation, p2p_phi, slide_->goal_slide_pos, false);
+    // limit_success = manipulator_->limit_check(p2p_positoin, p2p_rotation);
+    // if(limit_success)
+    //   ik_success = manipulator_->inverseKinematics(robotis_->ik_id_end_,
+    //                                                           p2p_positoin, p2p_rotation, p2p_phi, slide_->goal_slide_pos, false);
     robotis_->is_ik = false;
   }
   if ((ik_success == true && limit_success == true) || req.action.size() < 2)

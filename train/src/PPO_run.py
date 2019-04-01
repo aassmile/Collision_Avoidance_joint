@@ -18,34 +18,47 @@ GOAL_REWARD = 1500
 LOAD = False
 
 def train(nameIndx):
-    global left_run, right_run
+    global l_run, r_run
     T_REWARD = []
     MU_REWARD = 0
     BEST_R = 0
     env = Test(nameIndx) #0 = right
 
     # agent = DDPG(a_dim, s_dim, a_bound, SIDE[nameIndx])
-    agent = PPO(act_dim=8, obs_dim=39,
+    agent = PPO(act_dim=7, obs_dim=39,
                 lr_actor=0.0001, lr_value=0.0002, gamma=0.9, clip_range=0.2, name=SIDE[nameIndx])
 
     var = 0.8  # control exploration
     rar = 0.3
     cnt = 0
+
+    if nameIndx == 0:
+        r_run = False
+    elif nameIndx ==1:
+        l_run = False
+    while r_run or l_run:
+        time.sleep(0)
+    time.sleep(0.5)
     
     t1 = time.time()
     while int(time.time())%5 != 0:
-            nameIndx = nameIndx
+            time.sleep(0)
     for i in range(MAX_EPISODES):
-        while right_run or left_run:
-            nameIndx = nameIndx
+        if nameIndx == 0:
+            r_run = False
+        elif nameIndx ==1:
+            l_run = False
+        while r_run or l_run:
+            time.sleep(0)
 
         s = env.reset()
-        while int(time.time())%2 != 0:
-            nameIndx = nameIndx
+
+        time.sleep(0.1)
         if nameIndx == 0:
-            right_run = True
-        elif nameIndx == 1:
-            left_run = True
+            r_run = True
+        elif nameIndx ==1:
+            l_run = True
+
         ep_reward = 0
         for j in range(MAX_EP_STEPS):
             a, neglogp, _ = agent.choose_action(s)
@@ -71,11 +84,6 @@ def train(nameIndx):
         print('Episode:', i, ' Reward: %i' % int(ep_reward), 'MU_REWARD: ', int(MU_REWARD),'BEST_R: ', int(BEST_R), 'cnt = ',j)# , 't_step:', int(t23), 't_learn: ', int(t32)) #'var: %.3f' % var, 'rar: %.3f' % rar)
         if MU_REWARD > GOAL_REWARD:
             break
-        if nameIndx == 0:
-            right_run = False
-        elif nameIndx == 1:
-            left_run = False
-
 
     if os.path.isdir(agent.path): shutil.rmtree(agent.path)
     os.mkdir(agent.path)
@@ -98,8 +106,8 @@ def action_sample(s):
 if __name__ == '__main__':
     rospy.init_node('a')
     threads = []
-    left_run = False
-    right_run = False
+    l_run = True
+    r_run = True
     for i in range(2):
         t = threading.Thread(target=train, args=(i,))
         threads.append(t)
